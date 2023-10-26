@@ -1,4 +1,4 @@
-# Abstract API
+# Chameleon API
 Abstract Golang API for MongoDB with Dynamic Collection and Advanced Searching.
 
 ## About
