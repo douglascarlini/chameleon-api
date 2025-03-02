@@ -40,7 +40,8 @@ func init() {
 var client *mongo.Client
 
 func main() {
-	clientOptions := options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s@%s:%s", DB_USER, DB_PASS, DB_HOST, DB_PORT))
+	dsn := fmt.Sprintf("mongodb://%s:%s@%s:%s", DB_USER, DB_PASS, DB_HOST, DB_PORT)
+	clientOptions := options.Client().ApplyURI(dsn)
 
 	var err error
 	client, err = mongo.Connect(context.Background(), clientOptions)

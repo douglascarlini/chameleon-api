@@ -53,6 +53,6 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := map[string]interface{}{"id": res.InsertedID}
+	data := map[string]interface{}{"_id": res.InsertedID}
 	respondWithJSON(w, data, http.StatusCreated)
 }
