@@ -39,8 +39,8 @@ func main() {
 	api := r.PathPrefix("/api").Subrouter()
 	api.Use(jwtAuthMiddleware)
 
-	auth.HandleFunc("/signup", signUp).Methods("POST")
-	auth.HandleFunc("/signin", signIn).Methods("POST")
+	auth.HandleFunc("/sign-up", signUp).Methods("POST")
+	auth.HandleFunc("/sign-in", signIn).Methods("POST")
 
 	api.HandleFunc("/{collection}", createHandler).Methods("POST")
 	api.HandleFunc("/{collection}/{id}", updateHandler).Methods("PUT")
