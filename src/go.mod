@@ -3,7 +3,10 @@ module imovelis
 go 1.20
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/websocket v1.5.3
+	github.com/streadway/amqp v1.1.0
 	go.mongodb.org/mongo-driver v1.12.1
 )
 

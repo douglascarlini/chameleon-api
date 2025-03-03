@@ -33,7 +33,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	collection := client.Database(DB_NAME).Collection(collectionName)
+	collection := db.Collection(collectionName)
 
 	oid, err := primitive.ObjectIDFromHex(documentID)
 	if err != nil {

@@ -23,16 +23,16 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var searchOptions map[string]interface{}
+	var searchOptions map[string]any
 	err = json.Unmarshal(body, &searchOptions)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	paging, _ := searchOptions["paging"].(map[string]interface{})
-	filter, _ := searchOptions["filter"].(map[string]interface{})
-	sort, _ := searchOptions["sort"].(map[string]interface{})
+	paging, _ := searchOptions["paging"].(map[string]any)
+	filter, _ := searchOptions["filter"].(map[string]any)
+	sort, _ := searchOptions["sort"].(map[string]any)
 
 	filterQuery := bson.M{}
 
@@ -40,7 +40,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		filterQuery = filter
 	}
 
-	collection := client.Database(DB_NAME).Collection(collectionName)
+	collection := db.Collection(collectionName)
 
 	var sortOptions bson.D
 	for key, value := range sort {
@@ -69,32 +69,32 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cursor.Close(context.Background())
 
-	var results []map[string]interface{}
+	var results []map[string]any
 	for cursor.Next(context.Background()) {
-		var result map[string]interface{}
+		var result map[string]any
 		err := cursor.Decode(&result)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		var joinOptions map[string]interface{}
-		joinOptions, hasJoins := searchOptions["join"].(map[string]interface{})
+		var joinOptions map[string]any
+		joinOptions, hasJoins := searchOptions["join"].(map[string]any)
 
 		if hasJoins {
 			for joinCollection, joinField := range joinOptions {
 
 				joinFilter := bson.M{joinField.(string): result["_id"]}
-				joinCursor, err := client.Database(DB_NAME).Collection(joinCollection).Find(context.Background(), joinFilter)
+				joinCursor, err := db.Collection(joinCollection).Find(context.Background(), joinFilter)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
 				defer joinCursor.Close(context.Background())
 
-				var joinResults []map[string]interface{}
+				var joinResults []map[string]any
 				for joinCursor.Next(context.Background()) {
-					var joinResult map[string]interface{}
+					var joinResult map[string]any
 					err := joinCursor.Decode(&joinResult)
 					if err != nil {
 						http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -107,7 +107,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		loadOptions, hasLoad := searchOptions["load"].(map[string]interface{})
+		loadOptions, hasLoad := searchOptions["load"].(map[string]any)
 
 		if hasLoad {
 			for targetCollection, fieldMapping := range loadOptions {
@@ -122,8 +122,8 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, results, http.StatusOK)
 }
 
-func loadEntryOnCollection(collection string, value interface{}) interface{} {
-	targetColl := client.Database(DB_NAME).Collection(collection)
+func loadEntryOnCollection(collection string, value any) any {
+	targetColl := db.Collection(collection)
 
 	cursor, err := targetColl.Find(context.Background(), bson.M{"_id": value})
 	if err != nil {
@@ -132,7 +132,7 @@ func loadEntryOnCollection(collection string, value interface{}) interface{} {
 	defer cursor.Close(context.Background())
 
 	if cursor.Next(context.Background()) {
-		var record map[string]interface{}
+		var record map[string]any
 		if err := cursor.Decode(&record); err != nil {
 			return err
 		}

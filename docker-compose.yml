@@ -1,33 +1,46 @@
 services:
-  db:
+  mdb:
     image: mongo
-    restart: always
+    restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASS}
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USER:-username}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASS:-password}
     volumes:
-      - ./data/db:/data/db
+      - ./data/mdb:/data/db
+
+  rmq:
+    image: rabbitmq:3-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RMQ_USER:-username}
+      RABBITMQ_DEFAULT_PASS: ${RMQ_PASS:-password}
+    volumes:
+      - ./data/rmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro
+      - ./data/rmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+    ports:
+      - ${RMQ_PORT:-8082}:15672
 
   dba:
     image: mongo-express
-    restart: always
+    restart: unless-stopped
     environment:
-      ME_CONFIG_MONGODB_SERVER: db
-      ME_CONFIG_BASICAUTH_USERNAME: ${DB_USER}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${DB_PASS}
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${DB_USER}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${DB_PASS}
+      ME_CONFIG_MONGODB_SERVER: mdb
+      ME_CONFIG_BASICAUTH_USERNAME: ${MDB_USER:-username}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MDB_PASS:-password}
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MDB_USER:-username}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MDB_PASS:-password}
     depends_on:
-      - db
+      - mdb
     ports:
-      - ${DBA_PORT}:8081
+      - ${DBA_PORT:-8081}:8081
 
   api:
     build: .
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env
     depends_on:
-      - db
+      - mdb
+      - rmq
     ports:
-      - ${API_PORT}:80
+      - ${API_PORT:-8080}:80

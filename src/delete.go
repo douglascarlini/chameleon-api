@@ -20,13 +20,13 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	collection := client.Database(DB_NAME).Collection(collectionName)
+	collection := db.Collection(collectionName)
 	res, err := collection.DeleteOne(context.Background(), bson.M{"_id": oid})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	data := map[string]interface{}{"rows": res.DeletedCount}
+	data := map[string]any{"rows": res.DeletedCount}
 	respondWithJSON(w, data, http.StatusOK)
 }

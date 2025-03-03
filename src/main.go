@@ -3,35 +3,53 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
+	"imovelis/queue"
+	"sync"
 
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var DB_HOST = os.Getenv("DB_HOST")
-var DB_PORT = os.Getenv("DB_PORT")
-var DB_NAME = os.Getenv("DB_NAME")
-var DB_USER = os.Getenv("DB_USER")
-var DB_PASS = os.Getenv("DB_PASS")
+var (
+	err    error
+	rmq    *queue.RMQ
+	db     *mongo.Database
+	client *mongo.Client
 
-var client *mongo.Client
+	upgrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+
+	connections = make(map[string]*websocket.Conn)
+	mutex       sync.Mutex
+)
 
 func main() {
-	dsn := fmt.Sprintf("mongodb://%s:%s@%s:%s", DB_USER, DB_PASS, DB_HOST, DB_PORT)
+
+	dsn := fmt.Sprintf("mongodb://%s:%s@mdb:27017", MDB_USER, MDB_PASS)
 	clientOptions := options.Client().ApplyURI(dsn)
 
-	var err error
 	client, err = mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	db = client.Database(MDB_NAME)
+
+	dsn = fmt.Sprintf("amqp://%s:%s@rmq:5672", RMQ_USER, RMQ_PASS)
+	rmq = queue.Connect(dsn)
+
+	Creator()
+
 	r := mux.NewRouter()
+	r.HandleFunc("/ws", wsHandler)
 	r.HandleFunc("/{collection}", createHandler).Methods("POST")
 	r.HandleFunc("/{collection}/{id}", updateHandler).Methods("PUT")
 	r.HandleFunc("/{collection}/{id}", deleteHandler).Methods("DELETE")
@@ -40,4 +58,5 @@ func main() {
 	http.Handle("/", r)
 	log.Print("Running on port 80...")
 	log.Fatal(http.ListenAndServe(":80", r))
+
 }

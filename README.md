@@ -11,13 +11,14 @@ Originally conceived for personal use, this project was designed to facilitate i
 Create an `.env` file with application settings.
 
 ```
-DB_HOST=db
-DB_USER=root
-DB_PASS=root
-DB_NAME=data
-DB_PORT=27017
-API_PORT=8080
-DBA_PORT=8081
+MDB_NAME=data
+MDB_USER=root
+MDB_PASS=root
+RMQ_USER=root
+RMQ_PASS=root
+API_PORT=9080
+DBA_PORT=9081
+RMQ_PORT=9082
 ```
 
 ## How to Run
