@@ -16,12 +16,8 @@ type Claims struct {
 
 func generateToken(userID string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
-	claims := &Claims{
-		UserID: userID,
-		MapClaims: jwt.MapClaims{
-			"exp": expirationTime,
-		},
-	}
+	basic := jwt.MapClaims{"exp": expirationTime}
+	claims := &Claims{UserID: userID, MapClaims: basic}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(JWT_CODE))
 }
