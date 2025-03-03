@@ -19,24 +19,6 @@ var DB_NAME = os.Getenv("DB_NAME")
 var DB_USER = os.Getenv("DB_USER")
 var DB_PASS = os.Getenv("DB_PASS")
 
-func init() {
-	if len(DB_HOST) == 0 {
-		DB_HOST = "localhost"
-	}
-	if len(DB_PORT) == 0 {
-		DB_PORT = "27017"
-	}
-	if len(DB_USER) == 0 {
-		DB_USER = "root"
-	}
-	if len(DB_PASS) == 0 {
-		DB_PASS = "root"
-	}
-	if len(DB_NAME) == 0 {
-		DB_NAME = "data"
-	}
-}
-
 var client *mongo.Client
 
 func main() {

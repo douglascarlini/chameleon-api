@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -13,8 +14,14 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	collectionName := params["collection"]
 	id := params["id"]
 
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	collection := client.Database(DB_NAME).Collection(collectionName)
-	res, err := collection.DeleteOne(context.Background(), bson.M{"_id": id})
+	res, err := collection.DeleteOne(context.Background(), bson.M{"_id": oid})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
