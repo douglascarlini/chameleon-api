@@ -13,16 +13,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var DB_HOST = os.Getenv("DB_HOST")
-var DB_PORT = os.Getenv("DB_PORT")
-var DB_NAME = os.Getenv("DB_NAME")
-var DB_USER = os.Getenv("DB_USER")
-var DB_PASS = os.Getenv("DB_PASS")
+var JWT_SECRET = os.Getenv("JWT_SECRET")
+var MDB_NAME = os.Getenv("MDB_NAME")
+var MDB_USER = os.Getenv("MDB_USER")
+var MDB_PASS = os.Getenv("MDB_PASS")
+var db *mongo.Database
 
 var client *mongo.Client
 
 func main() {
-	dsn := fmt.Sprintf("mongodb://%s:%s@%s:%s", DB_USER, DB_PASS, DB_HOST, DB_PORT)
+	dsn := fmt.Sprintf("mongodb://%s:%s@db:27017", MDB_USER, MDB_PASS)
 	clientOptions := options.Client().ApplyURI(dsn)
 
 	var err error
@@ -31,11 +31,21 @@ func main() {
 		log.Fatal(err)
 	}
 
+	db = client.Database(MDB_NAME)
+
 	r := mux.NewRouter()
-	r.HandleFunc("/{collection}", createHandler).Methods("POST")
-	r.HandleFunc("/{collection}/{id}", updateHandler).Methods("PUT")
-	r.HandleFunc("/{collection}/{id}", deleteHandler).Methods("DELETE")
-	r.HandleFunc("/{collection}/search", searchHandler).Methods("POST")
+
+	auth := r.PathPrefix("/auth").Subrouter()
+	api := r.PathPrefix("/api").Subrouter()
+	api.Use(jwtAuthMiddleware)
+
+	auth.HandleFunc("/signup", signUp).Methods("POST")
+	auth.HandleFunc("/signin", signIn).Methods("POST")
+
+	api.HandleFunc("/{collection}", createHandler).Methods("POST")
+	api.HandleFunc("/{collection}/{id}", updateHandler).Methods("PUT")
+	api.HandleFunc("/{collection}/{id}", deleteHandler).Methods("DELETE")
+	api.HandleFunc("/{collection}/search", searchHandler).Methods("POST")
 
 	http.Handle("/", r)
 	log.Print("Running on port 80...")

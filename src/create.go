@@ -18,13 +18,13 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		sendBadRequest(w, err.Error())
 		return
 	}
 
-	var payload map[string]interface{}
+	var payload map[string]any
 	if err := json.Unmarshal(body, &payload); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		sendBadRequest(w, err.Error())
 		return
 	}
 
@@ -46,13 +46,12 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 	payload["created"] = time.Now()
 
-	collection := client.Database(DB_NAME).Collection(collectionName)
+	collection := db.Collection(collectionName)
 	res, err := collection.InsertOne(context.Background(), payload)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		sendError(w, err.Error())
 		return
 	}
 
-	data := map[string]interface{}{"_id": res.InsertedID}
-	respondWithJSON(w, data, http.StatusCreated)
+	sendData(w, map[string]any{"_id": res.InsertedID})
 }

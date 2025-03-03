@@ -16,17 +16,16 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		sendError(w, err.Error())
 		return
 	}
 
-	collection := client.Database(DB_NAME).Collection(collectionName)
+	collection := db.Collection(collectionName)
 	res, err := collection.DeleteOne(context.Background(), bson.M{"_id": oid})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		sendError(w, err.Error())
 		return
 	}
 
-	data := map[string]interface{}{"rows": res.DeletedCount}
-	respondWithJSON(w, data, http.StatusOK)
+	sendData(w, map[string]any{"rows": res.DeletedCount})
 }

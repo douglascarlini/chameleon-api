@@ -18,26 +18,26 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		sendBadRequest(w, err.Error())
 		return
 	}
 
-	var payload map[string]interface{}
+	var payload map[string]any
 	if err := json.Unmarshal(body, &payload); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		sendBadRequest(w, err.Error())
 		return
 	}
 
 	if len(payload) == 0 {
-		http.Error(w, "", http.StatusBadRequest)
+		sendBadRequest(w, "")
 		return
 	}
 
-	collection := client.Database(DB_NAME).Collection(collectionName)
+	collection := db.Collection(collectionName)
 
 	oid, err := primitive.ObjectIDFromHex(documentID)
 	if err != nil {
-		http.Error(w, "", http.StatusBadRequest)
+		sendBadRequest(w, "Invalid ID")
 		return
 	}
 
@@ -46,15 +46,14 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 	res, err := collection.UpdateOne(context.Background(), filter, update)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		sendError(w, err.Error())
 		return
 	}
 
 	if res.MatchedCount == 0 {
-		http.Error(w, "", http.StatusNotFound)
+		sendNotFound(w, "")
 		return
 	}
 
-	response := map[string]interface{}{"rows": res.MatchedCount, "affected": res.ModifiedCount}
-	respondWithJSON(w, response, http.StatusOK)
+	sendData(w, map[string]any{"rows": res.MatchedCount, "affected": res.ModifiedCount})
 }

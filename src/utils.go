@@ -5,10 +5,29 @@ import (
 	"net/http"
 )
 
-func respondWithJSON(w http.ResponseWriter, data any, status int) {
-	responseJSON, _ := json.Marshal(data)
-
+func sendData(w http.ResponseWriter, data any) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	w.Write(responseJSON)
+	obj, _ := json.Marshal(data)
+	w.WriteHeader(http.StatusOK)
+	w.Write(obj)
+}
+
+func sendBadRequest(w http.ResponseWriter, message string) {
+	http.Error(w, message, http.StatusBadRequest)
+}
+
+func sendUnauthorized(w http.ResponseWriter, message string) {
+	http.Error(w, message, http.StatusUnauthorized)
+}
+
+func sendNotFound(w http.ResponseWriter, message string) {
+	http.Error(w, message, http.StatusNotFound)
+}
+
+func sendConflict(w http.ResponseWriter, message string) {
+	http.Error(w, message, http.StatusConflict)
+}
+
+func sendError(w http.ResponseWriter, message string) {
+	http.Error(w, message, http.StatusInternalServerError)
 }
