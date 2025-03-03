@@ -23,7 +23,7 @@ func generateToken(userID string) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(JWT_SECRET))
+	return token.SignedString([]byte(JWT_CODE))
 }
 
 func jwtAuthMiddleware(next http.Handler) http.Handler {
@@ -37,7 +37,7 @@ func jwtAuthMiddleware(next http.Handler) http.Handler {
 		claims := &Claims{}
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (any, error) {
-			return []byte(JWT_SECRET), nil
+			return []byte(JWT_CODE), nil
 		})
 		if err != nil || !token.Valid {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)

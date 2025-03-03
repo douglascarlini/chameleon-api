@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var JWT_SECRET = os.Getenv("JWT_SECRET")
+var JWT_CODE = os.Getenv("JWT_CODE")
 var MDB_NAME = os.Getenv("MDB_NAME")
 var MDB_USER = os.Getenv("MDB_USER")
 var MDB_PASS = os.Getenv("MDB_PASS")
@@ -22,7 +22,7 @@ var db *mongo.Database
 var client *mongo.Client
 
 func main() {
-	dsn := fmt.Sprintf("mongodb://%s:%s@db:27017", MDB_USER, MDB_PASS)
+	dsn := fmt.Sprintf("mongodb://%s:%s@mdb:27017", MDB_USER, MDB_PASS)
 	clientOptions := options.Client().ApplyURI(dsn)
 
 	var err error

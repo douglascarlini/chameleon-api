@@ -11,6 +11,7 @@ Originally conceived for personal use, this project was designed to facilitate i
 Create an `.env` file with application settings.
 
 ```
+JWT_CODE=code
 MDB_NAME=data
 MDB_USER=root
 MDB_PASS=root
