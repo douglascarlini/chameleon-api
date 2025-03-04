@@ -7,17 +7,18 @@ import (
 	"net/http"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type User struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	Phone     string    `json:"phone"`
-	Email     string    `json:"email"`
-	Username  string    `json:"username"`
-	Password  string    `json:"password"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        primitive.ObjectID `json:"_id"`
+	Name      string             `json:"name"`
+	Phone     string             `json:"phone"`
+	Email     string             `json:"email"`
+	Username  string             `json:"username"`
+	Password  string             `json:"password"`
+	CreatedAt time.Time          `json:"created_at"`
 }
 
 func signUp(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +44,7 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 
 	collection := db.Collection("users")
 
-	var load User
+	var load map[string]any
 	filter := map[string]string{"username": user.Username}
 	err = collection.FindOne(context.Background(), filter).Decode(&load)
 	if err == nil {

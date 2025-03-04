@@ -35,6 +35,9 @@ func main() {
 
 	r := mux.NewRouter()
 
+	fs := http.StripPrefix("/cdn/", http.FileServer(http.Dir("./assets")))
+	r.PathPrefix("/cdn/").Handler(fs)
+
 	auth := r.PathPrefix("/auth").Subrouter()
 	api := r.PathPrefix("/api").Subrouter()
 	api.Use(jwtAuthMiddleware)

@@ -23,8 +23,19 @@ services:
     ports:
       - ${DBA_PORT:-8081}:8081
 
+  # api:
+  #   build: .
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - mdb
+  #   ports:
+  #     - ${API_PORT:-8080}:80
+
   api:
-    build: .
+    # build: .
+    image: golang:1.20-alpine
     restart: unless-stopped
     env_file:
       - .env
@@ -32,3 +43,6 @@ services:
       - mdb
     ports:
       - ${API_PORT:-8080}:80
+    volumes:
+      - ./src:/app
+    command: sh -c "cd /app && go run ."
