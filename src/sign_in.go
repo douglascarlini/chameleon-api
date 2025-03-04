@@ -28,7 +28,12 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 	filter := map[string]any{"username": user.Username}
 
 	err = collection.FindOne(context.Background(), filter).Decode(&load)
-	if err != nil && err != mongo.ErrNoDocuments {
+
+	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			sendUnauthorized(w, "")
+			return
+		}
 		sendError(w, err.Error())
 		return
 	}
